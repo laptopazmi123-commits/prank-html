@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>You Are An Idiot</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html, body {
+    width: 100%; height: 100%; overflow: hidden;
+    background: #000;
+    font-family: "Comic Sans MS", "Arial Black", Arial, sans-serif;
+    cursor: pointer;
+  }
+
+  .center-stage {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    width: 90vw;
+    text-align: center;
+    z-index: 5;
+    user-select: none;
+  }
+
+  /* Wajah tersenyum */
+  .smiley-row {
+    display: none;
+    justify-content: center;
+    gap: 6vw;
+    animation: blinkBW 0.35s steps(1) infinite;
+  }
+
+  .smiley {
+    width: 22vw; height: 22vw;
+    max-width: 220px; max-height: 220px;
+    border-radius: 50%;
+    border: 8px solid #fff;
+    background: #000;
+    position: relative;
+    flex-shrink: 0;
+  }
+
+  .smiley .eye {
+    position: absolute;
+    width: 12%; height: 18%;
+    background: #fff;
+    border-radius: 50%;
+    top: 28%;
+  }
+  .smiley .eye.left  { left: 22%; }
+  .smiley .eye.right { right: 22%; }
+
+  .smiley .mouth {
+    position: absolute;
+    bottom: 20%; left: 50%;
+    transform: translateX(-50%);
+    width: 55%; height: 30%;
+    border-bottom: 8px solid #fff;
+    border-radius: 0 0 50% 50%;
+  }
+
+  @keyframes blinkBW {
+    0%   { filter: invert(0); }
+    50%  { filter: invert(1); }
+    100% { filter: invert(0); }
+  }
+
+  /* Teks langsung tampil, kedip cepat */
+  .idiot-text {
+    display: block;
+    color: #fff;
+    font-size: 9vw;
+    font-weight: bold;
+    line-height: 1.1;
+    white-space: nowrap;
+    text-shadow: 0 0 12px #fff, 0 0 24px #888;
+    animation: flashText 0.15s steps(1) infinite;
+  }
+
+  @keyframes flashText {
+    0%   { opacity: 1;   color: #fff; }
+    50%  { opacity: 0.5; color: #000; }
+    100% { opacity: 1;   color: #fff; }
+  }
+
+  /* Popup warning */
+  .popup {
+    position: absolute;
+    background: #d0d0d0;
+    border: 3px outset #fff;
+    box-shadow: 5px 5px 15px rgba(0,0,0,0.8);
+    font-family: Tahoma, Verdana, sans-serif;
+    font-size: 14px;
+    color: #000;
+    z-index: 100;
+    min-width: 220px;
+    animation: popupIn 0.15s ease-out;
+  }
+
+  @keyframes popupIn {
+    from { transform: scale(0.8); opacity: 0; }
+    to   { transform: scale(1);   opacity: 1; }
+  }
+
+  .popup .titlebar {
+    background: #000; color: #fff;
+    padding: 4px 6px; font-weight: bold;
+    display: flex; justify-content: space-between;
+    align-items: center; cursor: move;
+  }
+  .popup .titlebar .closebtn {
+    background: #c0c0c0; color: #000;
+    border: 2px outset #fff;
+    width: 18px; height: 18px;
+    font-size: 12px; font-weight: bold;
+    line-height: 14px; text-align: center;
+    cursor: pointer;
+  }
+  .popup .content { padding: 12px; display: flex; gap: 10px; align-items: center; }
+  .popup .content .icon { font-size: 28px; }
+  .popup button {
+    padding: 4px 12px;
+    border: 2px outset #fff;
+    background: #c0c0c0; cursor: pointer; margin-top: 8px;
+  }
+  .popup button:active { border: 2px inset #fff; }
+</style>
+</head>
+<body>
+
+<!-- ===== AUDIO ===== -->
+<audio id="bgMusic" loop preload="auto" autoplay playsinline>
+  <source src="idiot.mp3" type="audio/mpeg">
+  Browser tidak mendukung audio.
+</audio>
+
+<div class="center-stage">
+  <div class="smiley-row" id="smileyRow">
+    <div class="smiley"><div class="eye left"></div><div class="eye right"></div><div class="mouth"></div></div>
+    <div class="smiley"><div class="eye left"></div><div class="eye right"></div><div class="mouth"></div></div>
+    <div class="smiley"><div class="eye left"></div><div class="eye right"></div><div class="mouth"></div></div>
+  </div>
+  <div class="idiot-text" id="idiotText">YOU ARE AN IDIOT!</div>
+</div>
+
+<script>
+/* ============================================================
+   MUSIK: coba autoplay, fallback klik
+   ============================================================ */
+const bgMusic = document.getElementById('bgMusic');
+bgMusic.volume = 0.7;
+let musicStarted = false;
+
+function startMusic() {
+  if (musicStarted) return;
+  bgMusic.play().then(() => {
+    musicStarted = true;
+    document.removeEventListener('click', startMusic);
+    document.removeEventListener('keydown', startMusic);
+    document.removeEventListener('touchstart', startMusic);
+  }).catch(err => console.warn('Gagal memutar musik:', err));
+}
+
+window.addEventListener('load', () => {
+  bgMusic.play().then(() => { musicStarted = true; }).catch(() => {
+    document.addEventListener('click', startMusic);
+    document.addEventListener('keydown', startMusic);
+    document.addEventListener('touchstart', startMusic);
+  });
+});
+
+/* ============================================================
+   TAMPILAN: teks langsung tampil, bergantian cepat
+   ============================================================ */
+const smileyRow = document.getElementById('smileyRow');
+const idiotText = document.getElementById('idiotText');
+
+let showText = true;
+idiotText.style.display = 'block';
+smileyRow.style.display = 'none';
+
+function toggleDisplay() {
+  showText = !showText;
+  if (showText) {
+    smileyRow.style.display = 'none';
+    idiotText.style.display = 'block';
+  } else {
+    smileyRow.style.display = 'flex';
+    idiotText.style.display = 'none';
+  }
+}
+setInterval(toggleDisplay, 400);
+
+/* ============================================================
+   POPUP LOGIC
+   ============================================================ */
+const POPUP_TITLES = ["Warning", "Alert", "Error", "Idiot Detected"];
+const POPUP_MESSAGES = [
+  "You are an idiot!",
+  "Ha ha ha ha ha!",
+  "Click OK to continue being an idiot.",
+  "Your brain has been detected as missing.",
+];
+let popupCount = 0;
+
+function rand(min, max) { return Math.random() * (max - min) + min; }
+function randInt(min, max) { return Math.floor(rand(min, max + 1)); }
+
+function createPopup() {
+  if (popupCount > 25) return;
+  const popup = document.createElement('div');
+  popup.className = 'popup';
+  const title = POPUP_TITLES[randInt(0, POPUP_TITLES.length - 1)];
+  const msg = POPUP_MESSAGES[randInt(0, POPUP_MESSAGES.length - 1)];
+  popup.style.left = rand(0, window.innerWidth - 260) + 'px';
+  popup.style.top  = rand(0, window.innerHeight - 160) + 'px';
+  popup.innerHTML = `
+    <div class="titlebar">
+      <span>${title}</span>
+      <span class="closebtn">✕</span>
+    </div>
+    <div class="content">
+      <div class="icon">⚠️</div>
+      <div><div>${msg}</div><button>OK</button></div>
+    </div>
+  `;
+  popup.querySelector('.closebtn').addEventListener('click', () => { createPopup(); createPopup(); });
+  popup.querySelector('button').addEventListener('click', () => { createPopup(); });
+
+  const tb = popup.querySelector('.titlebar');
+  let drag = false, ox = 0, oy = 0;
+  tb.addEventListener('mousedown', e => { drag = true; ox = e.clientX - popup.offsetLeft; oy = e.clientY - popup.offsetTop; });
+  document.addEventListener('mousemove', e => { if (drag) { popup.style.left = (e.clientX - ox) + 'px'; popup.style.top = (e.clientY - oy) + 'px'; } });
+  document.addEventListener('mouseup', () => drag = false);
+
+  document.body.appendChild(popup);
+  popupCount++;
+}
+
+/* ============================================================
+   MULAI CEPAT: popup langsung muncul saat halaman dimuat
+   ============================================================ */
+window.addEventListener('load', () => {
+  // Langsung munculkan 8 popup berturut-turut (sangat cepat)
+  for (let i = 0; i < 8; i++) {
+    setTimeout(createPopup, i * 50); // tiap 50ms -> total 400ms
+  }
+
+  // Popup tambahan terus-menerus
+  setInterval(() => {
+    if (Math.random() < 0.7) createPopup();
+  }, 500); // tiap 500ms (sebelumnya 1000ms)
+
+  // Klik di mana saja -> popup baru
+  document.addEventListener('click', e => {
+    if (!e.target.closest('.popup')) {
+      createPopup();
+      createPopup(); // dobel biar cepat
+    }
+  });
+
+  // Popup acak muncul lebih sering di awal (bonus)
+  setTimeout(() => {
+    for (let i = 0; i < 5; i++) setTimeout(createPopup, i * 30);
+  }, 1000);
+});
+</script>
+
+</body>
+</html>
